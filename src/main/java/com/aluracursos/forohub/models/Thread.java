@@ -1,9 +1,12 @@
 package com.aluracursos.forohub.models;
 
+import com.aluracursos.forohub.dto.CreateThreadData;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -33,4 +36,12 @@ public class Thread {
     @OneToMany(mappedBy = "thread")
     private List<Reply> replies;
 
+    public Thread(CreateThreadData data, User author) {
+        this.title=data.title();
+        this.message=data.message();
+        this.creationDate=LocalDateTime.now();
+        this.status=ThreadStatus.ACTIVE;
+        this.author=author;
+        this.replies=new ArrayList<>();
+    }
 }
