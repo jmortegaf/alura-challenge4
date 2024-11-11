@@ -1,5 +1,6 @@
 package com.aluracursos.forohub.models;
 
+import com.aluracursos.forohub.dto.CreateReplyData;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -30,4 +31,20 @@ public class Reply {
     @JoinColumn(name = "user_id")
     private User author;
 
+    public Reply(CreateReplyData replyData, Thread thread,User user) {
+        this.message=replyData.message();
+        this.thread=thread;
+        this.creationDate=LocalDateTime.now();
+        this.author=user;
+    }
+
+    @Override
+    public String toString() {
+        return "Reply{" +
+                "id=" + id +
+                ", message='" + message + '\'' +
+                ", author=" + author +
+                ", creationDate=" + creationDate +
+                '}';
+    }
 }

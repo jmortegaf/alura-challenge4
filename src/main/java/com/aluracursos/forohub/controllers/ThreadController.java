@@ -1,6 +1,8 @@
 package com.aluracursos.forohub.controllers;
 
+import com.aluracursos.forohub.dto.CreateReplyData;
 import com.aluracursos.forohub.dto.CreateThreadData;
+import com.aluracursos.forohub.dto.FullThreadData;
 import com.aluracursos.forohub.dto.ThreadData;
 import com.aluracursos.forohub.services.ThreadService;
 import jakarta.validation.Valid;
@@ -27,6 +29,21 @@ public class ThreadController {
     @PostMapping
     public ResponseEntity<ThreadData> createThread(@RequestBody @Valid CreateThreadData createThreadData){
         var threadData=threadService.createThread(createThreadData);
+        return ResponseEntity.ok(threadData);
+    }
+
+    @PostMapping("/{id}")
+    public ResponseEntity<FullThreadData> replyThread(@PageableDefault(size = 10)Pageable pageable,
+                                                      @PathVariable Long id,
+                                                      @RequestBody @Valid CreateReplyData createReplyData){
+        var threadData=threadService.replyThread(id,createReplyData,pageable);
+        return ResponseEntity.ok(threadData);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<FullThreadData> getThread(@PageableDefault(size = 10) Pageable pageable,
+                                                    @PathVariable @Valid Long id){
+        var threadData=threadService.getThread(id,pageable);
         return ResponseEntity.ok(threadData);
     }
 

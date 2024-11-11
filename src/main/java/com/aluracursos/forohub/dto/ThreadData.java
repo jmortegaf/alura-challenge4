@@ -12,13 +12,13 @@ public record ThreadData(
         LocalDateTime creationDate,
         ThreadStatus status,
         String author,
-        Integer replies) {
+        Integer replyCount) {
 
     public ThreadData(Thread thread){
         this(thread.getId(),thread.getTitle(),
                 thread.getMessage().length()>64?thread.getMessage().substring(0,64)+"...": thread.getMessage(),
                 thread.getCreationDate(),thread.getStatus(),thread.getAuthor().getUsername(),
-                thread.getReplies().size());
+                thread.getReplyCount());
     }
 
 }
