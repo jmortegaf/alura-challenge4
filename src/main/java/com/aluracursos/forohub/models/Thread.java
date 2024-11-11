@@ -65,4 +65,10 @@ public class Thread {
         this.replies.add(new Reply(replyData,this,user));
         this.replyCount+=1;
     }
+
+    public void setDeleted() {
+        this.title="[Deleted]";
+        this.message="[Deleted]";
+        this.replyCount=0;
+    }
 }

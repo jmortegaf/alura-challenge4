@@ -47,4 +47,8 @@ public class Reply {
                 ", creationDate=" + creationDate +
                 '}';
     }
+
+    public void setDeleted() {
+        this.message="[Deleted]";
+    }
 }

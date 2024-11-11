@@ -5,8 +5,8 @@ import com.aluracursos.forohub.exceptions.InvalidThreadStatusException;
 public enum ThreadStatus {
 
     ACTIVE("Active"),
-    PAUSED("Paused"),
-    CLOSED("Closed");
+    CLOSED("Closed"),
+    DELETED("Deleted");
 
     private String threadStatus;
 

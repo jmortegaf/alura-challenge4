@@ -47,5 +47,16 @@ public class ThreadController {
         return ResponseEntity.ok(threadData);
     }
 
+    @PutMapping("/{id}/close")
+    public ResponseEntity<ThreadData> closeThread(@PathVariable @Valid Long id){
+        var threadData=threadService.closeThread(id);
+        return ResponseEntity.ok(threadData);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ThreadData> deleteThread(@PathVariable @Valid Long id){
+        return ResponseEntity.ok(threadService.deleteThread(id));
+    }
+
 
 }

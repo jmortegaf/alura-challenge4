@@ -1,6 +1,8 @@
 package com.aluracursos.forohub.exceptions.handlers;
 
+import com.aluracursos.forohub.exceptions.InvalidThreadStatusException;
 import com.aluracursos.forohub.exceptions.InvalidUserRegisterDataException;
+import com.aluracursos.forohub.exceptions.UserAuthenticationErrorException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,8 +24,19 @@ public class ErrorHandler {
 
     @ExceptionHandler(InvalidUserRegisterDataException.class)
     public ResponseEntity<String> invalidUserRegisterDataHandler(InvalidUserRegisterDataException e){
-        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
+
+    @ExceptionHandler(UserAuthenticationErrorException.class)
+    public ResponseEntity<String> userAuthenticationErrorHandler(UserAuthenticationErrorException e){
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+    }
+
+    @ExceptionHandler(InvalidThreadStatusException.class)
+    public ResponseEntity<String> invalidThreadStatusHandler(InvalidThreadStatusException e){
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+    }
+
 
     public record ErrorData(String field,String msg){
         public ErrorData(FieldError error){
