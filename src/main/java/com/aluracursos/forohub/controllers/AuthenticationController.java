@@ -11,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,13 +28,10 @@ public class AuthenticationController {
     private TokenService tokenService;
 
     @PostMapping
-    public ResponseEntity authenticateUser(@RequestBody @Valid UserAuthenticationData userAuthenticationData){
+    public ResponseEntity<JWTTokenData> authenticateUser(@RequestBody @Valid UserAuthenticationData userAuthenticationData){
         Authentication authToken=new UsernamePasswordAuthenticationToken(
                 userAuthenticationData.userName(),userAuthenticationData.password());
         var authenticatedUser=authenticationManager.authenticate(authToken);
-        System.out.println(authToken.isAuthenticated());
-        System.out.println("hi");
-        System.out.println(authenticatedUser);
         var JWTToken=tokenService.generateToken((User)authenticatedUser.getPrincipal());
         return ResponseEntity.ok(new JWTTokenData(JWTToken));
     }

@@ -14,6 +14,7 @@ import com.aluracursos.forohub.repository.ReplyRepository;
 import com.aluracursos.forohub.repository.ThreadRepository;
 import com.aluracursos.forohub.repository.UserRepository;
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -61,17 +62,32 @@ public class ThreadService {
             if(!thread.getStatus().equals(ThreadStatus.ACTIVE))
                 throw new InvalidThreadStatusException("Error creating reply thread is "+thread.getStatus());
             thread.addReply(createReplyData,user);
-            threadRepository.save(thread);
-            Page<Reply> repliesPage=replyRepository.findByThreadId(thread.getId(),pageable);
+
+            Page<Reply> repliesPage=replyRepository.findByThreadIdAndParentReplyIsNull(thread.getId(),pageable);
             return new FullThreadData(thread,repliesPage);
         }
         throw new UserAuthenticationErrorException("User authentication failed.");
     }
 
+    @Transactional
+    public FullThreadData replyReply(@Valid Long threadId, @Valid Long replyId, @Valid CreateReplyData createReplyData,
+                             Pageable pageable) {
+        Authentication authentication= SecurityContextHolder.getContext().getAuthentication();
+        UserDetails userDetails=(UserDetails) authentication.getPrincipal();
+        var user=(User)userRepository.findByUserName(userDetails.getUsername());
+        var thread=threadRepository.findById(threadId).get();
+        if(!thread.getStatus().equals(ThreadStatus.ACTIVE))
+            throw new InvalidThreadStatusException("Error creating reply thread is "+thread.getStatus());
+        var reply=replyRepository.findById(replyId).get();
+        thread.addReplyToReply(createReplyData,reply,user);
+        Page<Reply> repliesPage=replyRepository.findByThreadIdAndParentReplyIsNull(thread.getId(),pageable);
+        return new FullThreadData(thread,repliesPage);
+    }
+
+    // Get Full Thread
     public FullThreadData getThread(Long id, Pageable pageable) {
         var thread=threadRepository.findById(id).get();
-        Page<Reply> repliesPage=replyRepository.findByThreadId(thread.getId(),pageable);
-
+        Page<Reply> repliesPage=replyRepository.findByThreadIdAndParentReplyIsNull(thread.getId(),pageable);
         if(thread.getStatus().equals(ThreadStatus.DELETED)){
             thread.setDeleted();
             repliesPage.forEach(Reply::setDeleted);
@@ -104,6 +120,24 @@ public class ThreadService {
                 thread.setStatus(ThreadStatus.DELETED);
                 return new ThreadData(thread);
             }
+        }
+        throw new UserAuthenticationErrorException("You are neither the thread author nor an admin to perform this task");
+    }
+
+    @Transactional
+    public ThreadData updateThread(@Valid Long id, CreateThreadData createThreadData) {
+        var thread = threadRepository.findById(id).get();
+        if(isThreadOwner(thread)){
+            thread.update(createThreadData);
+        }
+        return new ThreadData(thread);
+    }
+
+    private Boolean isThreadOwner(Thread thread){
+        Authentication authentication= SecurityContextHolder.getContext().getAuthentication();
+        if(authentication!=null && authentication.getPrincipal() instanceof UserDetails userDetails) {
+            var user = (User) userRepository.findByUserName(userDetails.getUsername());
+            return thread.getAuthor().equals(user);
         }
         throw new UserAuthenticationErrorException("You are neither the thread author nor an admin to perform this task");
     }

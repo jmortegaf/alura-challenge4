@@ -7,4 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ReplyRepository extends JpaRepository<Reply,Long> {
     Page<Reply> findByThreadId(Long id, Pageable pageable);
+
+    Page<Reply> findByThreadIdAndParentReplyIsNull(Long id, Pageable pageable);
 }

@@ -20,18 +20,22 @@ public class ThreadController {
     @Autowired
     private ThreadService threadService;
 
+
+    // Get all threads
     @GetMapping
     public ResponseEntity<Page<ThreadData>> getThreads(@PageableDefault(size = 10)Pageable pageable){
         var pageData=threadService.getThreads(pageable).map(ThreadData::new);
         return ResponseEntity.ok(pageData);
     }
 
+    // Create a new thread
     @PostMapping
     public ResponseEntity<ThreadData> createThread(@RequestBody @Valid CreateThreadData createThreadData){
         var threadData=threadService.createThread(createThreadData);
         return ResponseEntity.ok(threadData);
     }
 
+    // Reply to a thread
     @PostMapping("/{id}")
     public ResponseEntity<FullThreadData> replyThread(@PageableDefault(size = 10)Pageable pageable,
                                                       @PathVariable Long id,
@@ -40,11 +44,27 @@ public class ThreadController {
         return ResponseEntity.ok(threadData);
     }
 
+    // Reply to a reply
+    @PostMapping("/{threadId}/{replyId}")
+    public ResponseEntity<FullThreadData> replyReply(@PageableDefault(size = 10)Pageable pageable,
+                                                     @PathVariable @Valid Long threadId,
+                                                     @PathVariable @Valid Long replyId,
+                                                     @RequestBody @Valid CreateReplyData createReplyData){
+        var threadData=threadService.replyReply(threadId,replyId,createReplyData,pageable);
+        return ResponseEntity.ok(threadData);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<FullThreadData> getThread(@PageableDefault(size = 10) Pageable pageable,
                                                     @PathVariable @Valid Long id){
         var threadData=threadService.getThread(id,pageable);
         return ResponseEntity.ok(threadData);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ThreadData> editThread(@PathVariable @Valid Long id,
+                                                 @RequestBody CreateThreadData createThreadData){
+        return ResponseEntity.ok(threadService.updateThread(id,createThreadData));
     }
 
     @PutMapping("/{id}/close")

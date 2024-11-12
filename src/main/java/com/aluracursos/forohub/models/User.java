@@ -1,5 +1,6 @@
 package com.aluracursos.forohub.models;
 
+import com.aluracursos.forohub.dto.UserAuthenticationData;
 import com.aluracursos.forohub.dto.UserRegisterData;
 import jakarta.persistence.*;
 import jakarta.validation.Valid;
@@ -38,6 +39,12 @@ public class User implements UserDetails {
         this.userName=userRegisterData.userName();
         this.email=userRegisterData.email();
         this.password=hashedPassword;
+    }
+
+    public User(String userName, String hashedPassword) {
+        this.userName=userName;
+        this.password=hashedPassword;
+        this.email="test@test.test";
     }
 
     @Override

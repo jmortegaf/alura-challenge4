@@ -18,6 +18,8 @@ import java.time.ZoneOffset;
 public class TokenService {
     @Value("${jwt.secret}")
     private String jwtSecret;
+    @Value("${jwt.expiration.time}")
+    private Long jwtExpirationTime;
 
     public String generateToken(User user){
         try {
@@ -52,6 +54,6 @@ public class TokenService {
         }
     }
     private Instant generateExpirationDate(){
-        return LocalDateTime.now().plusHours(2).toInstant(ZoneOffset.of("-03:00"));
+        return LocalDateTime.now().plusHours(jwtExpirationTime).toInstant(ZoneOffset.of("-03:00"));
     }
 }
