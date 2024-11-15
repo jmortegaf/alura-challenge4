@@ -30,7 +30,8 @@ public class SecurityConfigurations {
                         .requestMatchers("/register").permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(session->session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
+                .cors(cors->cors.configure(httpSecurity));
         return httpSecurity.build();
     }
 

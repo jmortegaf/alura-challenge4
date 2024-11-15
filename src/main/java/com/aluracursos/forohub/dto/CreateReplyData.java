@@ -1,4 +1,6 @@
 package com.aluracursos.forohub.dto;
 
+import jakarta.validation.constraints.NotBlank;
+
 public record CreateReplyData(
-        String message) {}
+        @NotBlank String message) {}

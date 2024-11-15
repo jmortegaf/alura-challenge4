@@ -17,11 +17,6 @@ public record FullThreadData(
         Integer replyCount,
         Page<ReplyData> replies) {
 
-//    public FullThreadData(Thread thread) {
-//        this(thread.getId(), thread.getTitle(), thread.getMessage(), thread.getCreationDate(),
-//                thread.getStatus(),thread.getAuthor().getUsername(),thread.getReplyCount(),
-//                thread.getReplies().stream().map(ReplyData::new).toList());
-//    }
 
     public FullThreadData(Thread thread, Page<Reply> repliesPage) {
         this(thread.getId(), thread.getTitle(), thread.getMessage(), thread.getCreationDate(),

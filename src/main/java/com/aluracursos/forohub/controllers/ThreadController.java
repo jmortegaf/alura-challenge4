@@ -13,13 +13,14 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@CrossOrigin(origins = "http://127.0.0.1:3000", allowedHeaders ="Access-Control-Allow-Origin Authorization", allowCredentials = "true")
+
 @RestController
 @RequestMapping("/threads")
 public class ThreadController {
 
     @Autowired
     private ThreadService threadService;
-
 
     // Get all threads
     @GetMapping

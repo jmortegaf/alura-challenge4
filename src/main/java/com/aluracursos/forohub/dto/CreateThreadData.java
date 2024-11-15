@@ -1,10 +1,7 @@
 package com.aluracursos.forohub.dto;
 
-import com.aluracursos.forohub.models.Thread;
-import com.aluracursos.forohub.models.ThreadStatus;
-
-import java.time.LocalDateTime;
+import jakarta.validation.constraints.NotBlank;
 
 public record CreateThreadData(
-        String title,
-        String message) {}
+        @NotBlank String title,
+        @NotBlank String message) {}
