@@ -14,6 +14,8 @@ import com.aluracursos.forohub.models.User;
 import com.aluracursos.forohub.repository.ReplyRepository;
 import com.aluracursos.forohub.repository.ThreadRepository;
 import com.aluracursos.forohub.repository.UserRepository;
+import com.aluracursos.forohub.validations.thread.ThreadValidator;
+import com.aluracursos.forohub.validations.user.UserRegisterDataValidator;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +26,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
@@ -38,6 +41,9 @@ public class ThreadService {
     private ReplyRepository replyRepository;
     @Autowired
     private UtilsComponent utilsComponent;
+    @Autowired
+    private List<ThreadValidator> threadValidators;
+
 
     // return all threads in a pageable object
     public Page<Thread> getThreads(Pageable pageable) {
@@ -52,6 +58,7 @@ public class ThreadService {
 
     // create a new thread
     public ThreadData createThread(CreateThreadData createThreadData) {
+        threadValidators.forEach(validator->validator.validate(createThreadData));
         var user = utilsComponent.getUser();
         var thread = threadRepository.save(new Thread(createThreadData, user));
         return new ThreadData(thread);
@@ -119,6 +126,7 @@ public class ThreadService {
     // Update the content of a thread
     @Transactional
     public Map<String, String> updateThread(@Valid Long id, CreateThreadData createThreadData) {
+        threadValidators.forEach(validator->validator.validate(createThreadData));
         var thread = threadRepository.findById(id);
         if(thread.isPresent()){
             if (isThreadOwner(thread.get())) {

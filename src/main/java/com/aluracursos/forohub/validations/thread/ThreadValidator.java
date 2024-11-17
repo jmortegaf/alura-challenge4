@@ -2,7 +2,7 @@ package com.aluracursos.forohub.validations.thread;
 
 import com.aluracursos.forohub.dto.CreateThreadData;
 
-public interface CreateThreadValidator {
+public interface ThreadValidator {
 
     public void validate(CreateThreadData createThreadData);
 }

@@ -1,15 +1,14 @@
 package com.aluracursos.forohub.exceptions.handlers;
 
 import com.aluracursos.forohub.exceptions.*;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.Map;
-import java.util.stream.Stream;
+import java.util.Objects;
 
 @RestControllerAdvice
 public class ErrorHandler {
@@ -37,6 +36,18 @@ public class ErrorHandler {
     public ResponseEntity<?> invalidReplyHandler(InvalidReplyException e){
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(Map.of("error","Bad Request","message",e.getMessage()));
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<?> dataIntegrityViolationHandler(DataIntegrityViolationException e){
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("error","Bad Request","message",e.getRootCause().getMessage()));
+    }
+    @ExceptionHandler(InvalidThreadDataException.class)
+    public ResponseEntity<?> invalidThreadDataHandler(InvalidThreadDataException e){
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("error","Bad Request",
+                        "message",e.getMessage()));
     }
 
 }

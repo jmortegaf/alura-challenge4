@@ -24,7 +24,9 @@ public class Thread {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(unique = true)
     private String title;
+    @Column(unique = true)
     private String message;
     private LocalDateTime creationDate;
 
