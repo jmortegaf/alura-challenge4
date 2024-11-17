@@ -48,7 +48,7 @@ class AuthenticationControllerTest {
 
     }
     @Test
-    @DisplayName("Should return a 403 error response when the login information is not in the database")
+    @DisplayName("Should return a 401 error response when the login information is not in the database")
     void authenticateUserTest2() throws Exception {
         var userAuthenticationData=new UserAuthenticationData("user1","password1");
         var response=mockMvc.perform(post("/login")
@@ -57,7 +57,7 @@ class AuthenticationControllerTest {
                 .andReturn().getResponse();
 
         System.out.println(response);
-        assertThat(response.getStatus()).isEqualTo(HttpStatus.FORBIDDEN.value());
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.UNAUTHORIZED.value());
 
     }
 
