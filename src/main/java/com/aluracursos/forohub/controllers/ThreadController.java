@@ -5,6 +5,7 @@ import com.aluracursos.forohub.dto.CreateThreadData;
 import com.aluracursos.forohub.dto.FullThreadData;
 import com.aluracursos.forohub.dto.ThreadData;
 import com.aluracursos.forohub.services.ThreadService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/threads")
+@SecurityRequirement(name = "bearer-key")
 public class ThreadController {
 
     @Autowired

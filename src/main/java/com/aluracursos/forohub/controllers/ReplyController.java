@@ -4,6 +4,7 @@ import com.aluracursos.forohub.dto.CreateReplyData;
 import com.aluracursos.forohub.dto.ReplyData;
 import com.aluracursos.forohub.dto.SingleReplyData;
 import com.aluracursos.forohub.services.ReplyService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/reply")
+@SecurityRequirement(name = "bearer-key")
 public class ReplyController {
 
     @Autowired
