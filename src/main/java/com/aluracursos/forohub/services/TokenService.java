@@ -1,5 +1,6 @@
 package com.aluracursos.forohub.services;
 
+import com.aluracursos.forohub.exceptions.InvalidTokenException;
 import com.aluracursos.forohub.models.User;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
@@ -31,26 +32,22 @@ public class TokenService {
                     .withExpiresAt(generateExpirationDate())
                     .sign(algorithm);
         } catch (JWTCreationException exception){
-            // Invalid Signing configuration / Couldn't convert Claims.
             throw  new RuntimeException();
         }
     }
 
-    public String getSubject(String token){
+    public String getSubject(String token) throws InvalidTokenException{
         DecodedJWT decodedJWT;
         try {
             Algorithm algorithm = Algorithm.HMAC256(jwtSecret);
             JWTVerifier verifier = JWT.require(algorithm)
-                    // specify any specific claim validations
                     .withIssuer("alura-forohub")
-                    // reusable verifier instance
                     .build();
 
             decodedJWT = verifier.verify(token);
             return decodedJWT.getSubject();
         } catch (JWTVerificationException exception){
-            // Invalid signature/claims
-            throw new RuntimeException();
+            throw new InvalidTokenException("Invalid or missing token");
         }
     }
     private Instant generateExpirationDate(){

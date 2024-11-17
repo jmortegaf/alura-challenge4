@@ -1,9 +1,6 @@
 package com.aluracursos.forohub.exceptions.handlers;
 
-import com.aluracursos.forohub.exceptions.InvalidThreadStatusException;
-import com.aluracursos.forohub.exceptions.InvalidUserRegisterDataException;
-import com.aluracursos.forohub.exceptions.UserAuthenticationErrorException;
-import org.springframework.dao.DataIntegrityViolationException;
+import com.aluracursos.forohub.exceptions.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -11,36 +8,35 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.util.Map;
 import java.util.stream.Stream;
 
 @RestControllerAdvice
 public class ErrorHandler {
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Stream<ErrorData>> error400Handler(MethodArgumentNotValidException e){
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getFieldErrors()
-                .stream().map(ErrorData::new));
-    }
-
     @ExceptionHandler(InvalidUserRegisterDataException.class)
-    public ResponseEntity<String> invalidUserRegisterDataHandler(InvalidUserRegisterDataException e){
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+    public ResponseEntity<?> invalidUserRegisterDataHandler(InvalidUserRegisterDataException e){
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("error","Bad Request","message", e.getMessage()));
     }
 
     @ExceptionHandler(UserAuthenticationErrorException.class)
-    public ResponseEntity<String> userAuthenticationErrorHandler(UserAuthenticationErrorException e){
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+    public ResponseEntity<?> userAuthenticationErrorHandler(UserAuthenticationErrorException e){
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(Map.of("error","Unauthorized",
+                        "message",e.getMessage()));
     }
 
     @ExceptionHandler(InvalidThreadStatusException.class)
-    public ResponseEntity<String> invalidThreadStatusHandler(InvalidThreadStatusException e){
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+    public ResponseEntity<?> invalidThreadStatusHandler(InvalidThreadStatusException e){
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(Map.of("error","Unauthorized","message",e.getMessage()));
     }
 
-
-    public record ErrorData(String field,String msg){
-        public ErrorData(FieldError error){
-            this(error.getField(), error.getDefaultMessage());
-        }
+    @ExceptionHandler(InvalidReplyException.class)
+    public ResponseEntity<?> invalidReplyHandler(InvalidReplyException e){
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("error","Bad Request","message",e.getMessage()));
     }
+
 }

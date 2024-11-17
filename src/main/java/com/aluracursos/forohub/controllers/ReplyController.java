@@ -16,10 +16,31 @@ public class ReplyController {
     @Autowired
     private ReplyService replyService;
 
+    //Reply to an existing reply by its id;
+    @PostMapping("/{id}")
+    public ResponseEntity<?> replyToReply(@PathVariable @Valid Long id,
+                                          @RequestBody @Valid CreateReplyData createReplyData){
+        return ResponseEntity.ok(replyService.replyToReply(id,createReplyData));
+    }
+
+    // edit a reply by its id
     @PutMapping("/{id}")
-    public ResponseEntity<SingleReplyData> editReply(@PathVariable @Valid Long id,
+    public ResponseEntity<?> editReply(@PathVariable @Valid Long id,
                                                      @RequestBody CreateReplyData createReplyData){
         return ResponseEntity.ok(replyService.editReply(id,createReplyData));
     }
+
+    // Get a single reply by its id
+    @GetMapping("/{id}")
+    public ResponseEntity<SingleReplyData> getReply(@PathVariable @Valid Long id){
+        return ResponseEntity.ok(replyService.getReply(id));
+    }
+
+    // delete a reply (it just marks them as deleted so the content it never really erased)
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteReply(@PathVariable @Valid Long id){
+        return ResponseEntity.ok(replyService.deleteReply(id));
+    }
+
 
 }
