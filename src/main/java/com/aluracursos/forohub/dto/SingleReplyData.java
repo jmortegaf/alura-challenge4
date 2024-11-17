@@ -12,6 +12,8 @@ public record SingleReplyData(
        LocalDateTime creationDate) {
 
     public SingleReplyData(Reply reply) {
-        this(reply.getId(), reply.getMessage(), reply.getAuthor().getUsername(),reply.getCreationDate());
+        this(reply.getId(),
+                reply.isDeleted()?"[DELETED]":reply.getMessage(),
+                reply.getAuthor().getUsername(),reply.getCreationDate());
     }
 }

@@ -1,5 +1,6 @@
 package com.aluracursos.forohub.services;
 
+import com.aluracursos.forohub.components.UtilsComponent;
 import com.aluracursos.forohub.dto.CreateReplyData;
 import com.aluracursos.forohub.dto.CreateThreadData;
 import com.aluracursos.forohub.dto.FullThreadData;
@@ -23,6 +24,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
+import java.util.NoSuchElementException;
+
 @Service
 public class ThreadService {
 
@@ -32,113 +36,108 @@ public class ThreadService {
     private UserRepository userRepository;
     @Autowired
     private ReplyRepository replyRepository;
+    @Autowired
+    private UtilsComponent utilsComponent;
 
+    // return all threads in a pageable object
     public Page<Thread> getThreads(Pageable pageable) {
-        var pageData=threadRepository.findAll(pageable);
+        var pageData = threadRepository.findAll(pageable);
         pageData.forEach(thread -> {
-            if(thread.getStatus().equals(ThreadStatus.DELETED)){
+            if (thread.getStatus().equals(ThreadStatus.DELETED)) {
                 thread.setDeleted();
             }
         });
         return pageData;
     }
 
+    // create a new thread
     public ThreadData createThread(CreateThreadData createThreadData) {
-        Authentication authentication= SecurityContextHolder.getContext().getAuthentication();
-        if(authentication!=null && authentication.getPrincipal() instanceof UserDetails userDetails){
-            var user=(User)userRepository.findByUserName(userDetails.getUsername());
-            var thread=threadRepository.save(new Thread(createThreadData,user));
-            return new ThreadData(thread);
-        }
-        throw new UserAuthenticationErrorException("User authentication failed.");
-    }
-
-    @Transactional
-    public FullThreadData replyThread(Long id, CreateReplyData createReplyData, Pageable pageable){
-        Authentication authentication= SecurityContextHolder.getContext().getAuthentication();
-        if(authentication!=null && authentication.getPrincipal() instanceof UserDetails userDetails){
-            var user=(User)userRepository.findByUserName(userDetails.getUsername());
-            var thread=threadRepository.findById(id).get();
-            if(!thread.getStatus().equals(ThreadStatus.ACTIVE))
-                throw new InvalidThreadStatusException("Error creating reply thread is "+thread.getStatus());
-            thread.addReply(createReplyData,user);
-
-            Page<Reply> repliesPage=replyRepository.findByThreadIdAndParentReplyIsNull(thread.getId(),pageable);
-            return new FullThreadData(thread,repliesPage);
-        }
-        throw new UserAuthenticationErrorException("User authentication failed.");
-    }
-
-    @Transactional
-    public FullThreadData replyReply(@Valid Long threadId, @Valid Long replyId, @Valid CreateReplyData createReplyData,
-                             Pageable pageable) {
-        Authentication authentication= SecurityContextHolder.getContext().getAuthentication();
-        UserDetails userDetails=(UserDetails) authentication.getPrincipal();
-        var user=(User)userRepository.findByUserName(userDetails.getUsername());
-        var thread=threadRepository.findById(threadId).get();
-        if(!thread.getStatus().equals(ThreadStatus.ACTIVE))
-            throw new InvalidThreadStatusException("Error creating reply thread is "+thread.getStatus());
-        var reply=replyRepository.findById(replyId).get();
-        thread.addReplyToReply(createReplyData,reply,user);
-        Page<Reply> repliesPage=replyRepository.findByThreadIdAndParentReplyIsNull(thread.getId(),pageable);
-        return new FullThreadData(thread,repliesPage);
-    }
-
-    // Get Full Thread
-    public FullThreadData getThread(Long id, Pageable pageable) {
-        var thread=threadRepository.findById(id).get();
-        Page<Reply> repliesPage=replyRepository.findByThreadIdAndParentReplyIsNull(thread.getId(),pageable);
-        if(thread.getStatus().equals(ThreadStatus.DELETED)){
-            thread.setDeleted();
-            repliesPage.forEach(Reply::setDeleted);
-        }
-
-        return new FullThreadData(thread,repliesPage);
-    }
-
-    @Transactional
-    public ThreadData closeThread(Long id) {
-        Authentication authentication= SecurityContextHolder.getContext().getAuthentication();
-        if(authentication!=null && authentication.getPrincipal() instanceof UserDetails userDetails){
-            var user=(User)userRepository.findByUserName(userDetails.getUsername());
-            var thread=threadRepository.findById(id).get();
-            if(thread.getAuthor().equals(user)) {
-                thread.setStatus(ThreadStatus.CLOSED);
-                return new ThreadData(thread);
-            }
-        }
-        throw new UserAuthenticationErrorException("You are neither the thread author nor an admin to perform this task");
-    }
-
-    @Transactional
-    public ThreadData deleteThread(Long id) {
-        Authentication authentication= SecurityContextHolder.getContext().getAuthentication();
-        if(authentication!=null && authentication.getPrincipal() instanceof UserDetails userDetails) {
-            var user = (User) userRepository.findByUserName(userDetails.getUsername());
-            var thread = threadRepository.findById(id).get();
-            if (thread.getAuthor().equals(user)) {
-                thread.setStatus(ThreadStatus.DELETED);
-                return new ThreadData(thread);
-            }
-        }
-        throw new UserAuthenticationErrorException("You are neither the thread author nor an admin to perform this task");
-    }
-
-    @Transactional
-    public ThreadData updateThread(@Valid Long id, CreateThreadData createThreadData) {
-        var thread = threadRepository.findById(id).get();
-        if(isThreadOwner(thread)){
-            thread.update(createThreadData);
-        }
+        var user = utilsComponent.getUser();
+        var thread = threadRepository.save(new Thread(createThreadData, user));
         return new ThreadData(thread);
     }
 
-    private Boolean isThreadOwner(Thread thread){
-        Authentication authentication= SecurityContextHolder.getContext().getAuthentication();
-        if(authentication!=null && authentication.getPrincipal() instanceof UserDetails userDetails) {
+    // Reply to an active thread
+    @Transactional
+    public Map<String,String> replyThread(Long id, CreateReplyData createReplyData) {
+        var user = utilsComponent.getUser();
+        var thread = threadRepository.findById(id);
+        if(thread.isPresent()){
+            if (!thread.get().getStatus().equals(ThreadStatus.ACTIVE))
+                throw new InvalidThreadStatusException("Error creating reply, thread is " + thread.get().getStatus());
+            thread.get().addReply(createReplyData, user);
+            return Map.of("status","success",
+                    "message","Reply added successfully");
+        }
+        throw new NoSuchElementException("No thread with id:"+id);
+    }
+
+    // Get Full Thread
+    public FullThreadData getThread(Long id, Pageable pageable){
+        var thread = threadRepository.findById(id);
+        if(thread.isPresent()){
+            Page<Reply> repliesPage = replyRepository.findByThreadIdAndParentReplyIsNull(thread.get().getId(), pageable);
+            if (thread.get().getStatus().equals(ThreadStatus.DELETED)) {
+                thread.get().setDeleted();
+                repliesPage.forEach(Reply::setDeleted);
+            }
+            return new FullThreadData(thread.get(), repliesPage);
+        }
+        throw new NoSuchElementException("No thread with id:"+id);
+    }
+
+    // Mark a thread as closed
+    @Transactional
+    public Map<String,String> closeThread(Long id) {
+        var thread = threadRepository.findById(id);
+        if(thread.isPresent()){
+            if (isThreadOwner(thread.get())) {
+                thread.get().setStatus(ThreadStatus.CLOSED);
+                return Map.of("status","success",
+                "message","Thread closed successfully");
+            }
+            throw new UserAuthenticationErrorException("You are neither the thread author nor an admin to perform this task");
+        }
+        throw new NoSuchElementException("No thread with id:"+id);
+    }
+
+    // Mark a thread as deleted
+    @Transactional
+    public Map<String,String> deleteThread(Long id) {
+        var thread = threadRepository.findById(id);
+        if(thread.isPresent()){
+            if (isThreadOwner(thread.get())) {
+                thread.get().setStatus(ThreadStatus.DELETED);
+                return Map.of("status","success",
+                        "message","Thread deleted successfully");
+            }
+            throw new UserAuthenticationErrorException("You are neither the thread author nor an admin to perform this task");
+        }
+        throw new NoSuchElementException("No thread with id:"+id);
+    }
+
+    // Update the content of a thread
+    @Transactional
+    public Map<String, String> updateThread(@Valid Long id, CreateThreadData createThreadData) {
+        var thread = threadRepository.findById(id);
+        if(thread.isPresent()){
+            if (isThreadOwner(thread.get())) {
+                thread.get().update(createThreadData);
+                return Map.of("status","success",
+                        "message","Thread updated successfully");
+            }
+            throw new UserAuthenticationErrorException("You are neither the thread author nor an admin to perform this task");
+        }
+        throw new NoSuchElementException("No thread with id:"+id);
+    }
+
+    // Check if the request was sent by the thread owner
+    private Boolean isThreadOwner(Thread thread) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
             var user = (User) userRepository.findByUserName(userDetails.getUsername());
             return thread.getAuthor().equals(user);
         }
-        throw new UserAuthenticationErrorException("You are neither the thread author nor an admin to perform this task");
+        return false;
     }
 }

@@ -12,7 +12,9 @@ public record ReplyData(
         LocalDateTime creationDate,
         List<ReplyData> childReplies) {
     public ReplyData(Reply reply) {
-        this(reply.getId(), reply.getMessage(), reply.getAuthor().getUsername(),reply.getCreationDate(),
+        this(reply.getId(),
+                reply.isDeleted()?"[DELETED]":reply.getMessage(),
+                reply.getAuthor().getUsername(),reply.getCreationDate(),
                 reply.getChildReplies().stream().map(ReplyData::new).toList());
     }
 }

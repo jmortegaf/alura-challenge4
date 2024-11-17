@@ -4,6 +4,7 @@ import com.aluracursos.forohub.filters.SecurityFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.access.SecurityConfig;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -21,6 +22,12 @@ public class SecurityConfigurations {
     @Autowired
     private SecurityFilter securityFilter;
 
+    private final CustomAuthenticationEntryPoint authenticationEntryPoint;
+
+    public SecurityConfigurations(CustomAuthenticationEntryPoint authenticationEntryPoint){
+        this.authenticationEntryPoint=authenticationEntryPoint;
+    }
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.
@@ -30,6 +37,7 @@ public class SecurityConfigurations {
                         .requestMatchers("/register").permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(session->session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .exceptionHandling(exception->exception.authenticationEntryPoint(authenticationEntryPoint))
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .cors(cors->cors.configure(httpSecurity));
         return httpSecurity.build();

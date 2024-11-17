@@ -42,6 +42,8 @@ public class Reply {
     private List<Reply> childReplies;
     private Integer replyCount;
 
+    private boolean deleted=false;
+
 
 
     public Reply(CreateReplyData replyData, Thread thread,User user) {
@@ -51,6 +53,7 @@ public class Reply {
         this.author=user;
         this.childReplies=new ArrayList<>();
         this.replyCount=0;
+        this.deleted=false;
     }
 
     public Reply(@Valid CreateReplyData createReplyData, Thread thread, Reply reply, User user) {
@@ -61,6 +64,7 @@ public class Reply {
         this.parentReply=reply;
         this.childReplies=new ArrayList<>();
         this.replyCount=0;
+        this.deleted=false;
     }
 
     @Override
@@ -81,4 +85,13 @@ public class Reply {
         this.childReplies.add(newReply);
         this.replyCount+=1;
     }
+
+    public boolean hasChildren() {
+        return replyCount != 0;
+    }
+
+    public boolean hasParent() {
+        return parentReply!=null;
+    }
+
 }
