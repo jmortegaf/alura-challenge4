@@ -30,6 +30,18 @@ cd alura-challenge2
 ```
 
 ### Set the environment varibles in the application.properties file inside the ``````resources`````` directory:
+````
+spring.datasource.url=${DB_URL}
+spring.datasource.username=${DB_USER}
+spring.datasource.password=${DB_PASSWORD}
+
+jwt.secret=${JWT_SECRET}
+jwt.expiration.time=${JWT_EXP}
+
+server.ssl.key-store-password=${SSL_KEY_STORE_PASSWORD}
+server.ssl.key-alias=alura-forum
+server.allowed.origins=${ALLOWED_ORIGINS}
+````
 
 ### Put the ssl certificate in the `````resources````` directory.
 
